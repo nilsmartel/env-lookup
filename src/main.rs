@@ -40,6 +40,6 @@ fn main() {
 
     // print new line if we're in a terminal
     if is_terminal {
-        eprintln!();
+        println!();
     }
 }
