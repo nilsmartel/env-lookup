@@ -20,6 +20,11 @@ struct Opt {
     /// .env files which values can be used.
     /// These will be used before environment variables are checked.
     /// Multiple files can be used.
+    ///
+    /// Since this accepts multiple values, it greedily consumes the
+    /// arguments that follow it. Place the variable name before `-e`
+    /// (or after a `--`) so it is not swallowed, e.g.
+    /// `env-lookup HELLO -e sample-env`.
     #[structopt(short = "e", long = "env")]
     env: Vec<OsString>,
 }
