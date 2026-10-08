@@ -1,4 +1,5 @@
 use std::{
+    ffi::OsString,
     io::{Read, stdin},
     process::exit,
 };
@@ -12,11 +13,18 @@ struct Opt {
     /// (default when stdout is not a terminal)
     #[structopt(short = "s", long = "silent")]
     silent: bool,
+
+    /// .env files which values can be used.
+    /// These will be used before environment variables are checked.
+    /// Multiple files can be used.
+    #[structopt(short = "e", long = "env")]
+    env: Vec<OsString>,
 }
 
 fn main() {
     let is_terminal = io::stdout().is_terminal();
-    let silent = Opt::from_args().silent || !is_terminal;
+    let Opt { silent, env } = Opt::from_args();
+    let silent = silent || !is_terminal;
 
     // read stdin
     let key = {
@@ -31,7 +39,7 @@ fn main() {
         buffer
     };
 
-    let value = std::env::var(&key).expect("environment variable with key");
+    let value = get_env(&env, &key);
 
     if !silent {
         eprint!("{key}=");
@@ -42,4 +50,15 @@ fn main() {
     if is_terminal {
         println!();
     }
+}
+
+fn get_env(env: &[OsString], key: &str) -> String {
+    if !env.is_empty() {
+        let env_vars = env_file_reader::read_files(env).expect("to read env files");
+        if let Some(value) = env_vars.get(key) {
+            return value.to_string();
+        }
+    }
+
+    std::env::var(&key).expect("environment variable with key")
 }
