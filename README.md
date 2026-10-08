@@ -1,4 +1,4 @@
-# eval-env
+# env-lookup
 
 cli tool to be used along with `string template` in order to easily access environment variables in templates like this:
 
@@ -13,6 +13,6 @@ the tool itself reads the name of a variable from stdin and places the value int
 
 
 ```sh
-echo "PATH" | eval-env
+echo "PATH" | env-lookup
 ```
 
