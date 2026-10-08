@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# test.sh — smoke-test all functionality of eval-env.
+# test.sh — smoke-test all functionality of env-lookup.
 #
 # Builds the release binary, then exercises every behaviour:
 #   - lookup from a real environment variable
@@ -23,7 +23,7 @@ cd "$(dirname "$0")"
 # ---------------------------------------------------------------------------
 echo "==> Building (cargo build --release)"
 cargo build --release || { echo "build failed"; exit 1; }
-BIN="./target/release/eval-env"
+BIN="./target/release/env-lookup"
 echo
 
 # ---------------------------------------------------------------------------
@@ -86,6 +86,18 @@ check "multiple env files" "BAR" "$out"
 # 6. The key read from stdin is trimmed.
 out="$(printf '  HELLO \n' | "$BIN" -e sample-env)"
 check "stdin key is trimmed" "WORLD" "$out"
+
+# 6b. Positional key argument (no flag, no stdin) looks up an environment variable.
+out="$(GREETING=hi "$BIN" GREETING </dev/null)"
+check "positional key: env var lookup" "hi" "$out"
+
+# 6c. Positional key argument works together with an env file.
+out="$("$BIN" HELLO -e sample-env </dev/null)"
+check "positional key: env file lookup" "WORLD" "$out"
+
+# 6d. Positional key argument takes precedence over stdin.
+out="$(echo "FOO" | "$BIN" HELLO -e "$TMP_ENV")"
+check "positional key overrides stdin" "OVERRIDDEN" "$out"
 
 # 7. Silent mode: no "key=" prefix on stderr (and none on stdout either).
 err="$(echo "HELLO" | "$BIN" -s -e sample-env 2>&1 1>/dev/null)"
