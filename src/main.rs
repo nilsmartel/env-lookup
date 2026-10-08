@@ -9,6 +9,9 @@ use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 struct Opt {
+    /// Variable name to look up. If left empty, stdin will be used (default)
+    key: Option<String>,
+
     /// Silent mode: no additional info text
     /// (default when stdout is not a terminal)
     #[structopt(short = "s", long = "silent")]
@@ -23,20 +26,23 @@ struct Opt {
 
 fn main() {
     let is_terminal = io::stdout().is_terminal();
-    let Opt { silent, env } = Opt::from_args();
+    let Opt { key, silent, env } = Opt::from_args();
     let silent = silent || !is_terminal;
 
-    // read stdin
-    let key = {
-        let mut buffer = String::with_capacity(128);
-        stdin().read_to_string(&mut buffer).expect("read stdin");
-        let buffer = buffer.trim().to_string();
+    // Use the positional key argument if given, otherwise read it from stdin.
+    let key = match key {
+        Some(key) => key,
+        None => {
+            let mut buffer = String::with_capacity(128);
+            stdin().read_to_string(&mut buffer).expect("read stdin");
+            let buffer = buffer.trim().to_string();
 
-        if buffer.is_empty() {
-            eprintln!("expect to receive content from stdin");
-            exit(1);
+            if buffer.is_empty() {
+                eprintln!("expect to receive a key as an argument or from stdin");
+                exit(1);
+            }
+            buffer
         }
-        buffer
     };
 
     let value = get_env(&env, &key);
