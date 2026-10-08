@@ -2,6 +2,8 @@
 name = "env-lookup"
 version = "0.1.0"
 edition = "2024"
+description = "cli tool to look up env vars, possibly from different sources. Used for templating wit shell-string"
+license = "MIT"
 
 [dependencies]
 env-file-reader = "0.3.0"
