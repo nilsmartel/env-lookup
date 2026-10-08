@@ -16,3 +16,7 @@ the tool itself reads the name of a variable from stdin and places the value int
 echo "PATH" | env-lookup
 ```
 
+You can read envs from env files. Multiple ones even
+```sh
+echo "PATH" | env-lookup -e .env my-other-env-file
+```
