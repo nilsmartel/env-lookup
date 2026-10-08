@@ -34,21 +34,7 @@ fn main() {
     let Opt { key, silent, env } = Opt::from_args();
     let silent = silent || !is_terminal;
 
-    // Use the positional key argument if given, otherwise read it from stdin.
-    let key = match key {
-        Some(key) => key,
-        None => {
-            let mut buffer = String::with_capacity(128);
-            stdin().read_to_string(&mut buffer).expect("read stdin");
-            let buffer = buffer.trim().to_string();
-
-            if buffer.is_empty() {
-                eprintln!("expect to receive a key as an argument or from stdin");
-                exit(1);
-            }
-            buffer
-        }
-    };
+    let key = get_var_name(key);
 
     let value = get_env(&env, &key);
 
@@ -60,6 +46,23 @@ fn main() {
     // print new line if we're in a terminal
     if is_terminal {
         println!();
+    }
+}
+
+/// Use the positional key argument if given, otherwise read it from stdin.
+fn get_var_name(key: Option<String>) -> String {
+    if let Some(key) = key {
+        key
+    } else {
+        let mut buffer = String::with_capacity(128);
+        stdin().read_to_string(&mut buffer).expect("read stdin");
+        let buffer = buffer.trim().to_string();
+
+        if buffer.is_empty() {
+            eprintln!("expect to receive a key as an argument or from stdin");
+            exit(1);
+        }
+        buffer
     }
 }
 
